@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title id='title'>吃货</title>
+	<script>  
+	window.onload=function(){  
+		establish_map();  			//创建地图；
+		establish_snake();  		//创建蛇；
+		establish_food();  			//创建食物；
+		establish_explain() 		//游戏的说明
+		move();  					//蛇的运动函数；
+		dining();					//检测蛇有没有吃到食物；
+		detection();   				//检测蛇有没有回头和撞边框；	
+		time_(); 					//这个是当玩家吃到了十个食物就加快10mm（毫米）；
+		}; 
+	
+
+
+	var map_length=500;  
+	var snake_length=10;  
+	var snake_l=0;  
+	var snake_t=0;  
+	var speed=10;  
+	var time=100;  									
+	var timer1=null;
+	var timer2=null;
+	var timer3=null;
+
+
+
+
+
+	function establish_map(){  
+		var map=document.createElement('div');  
+		map.id="map";  
+		map.style.position='absolute';  			
+		map.style.top='20%';  
+		map.style.left='35%';  																		//创建地图；
+		map.style.background='#000';  
+		map.style.width=map_length+'px';  
+		map.style.height=map_length+'px';  
+		document.body.appendChild(map);  
+	}; 
+
+
+
+
+
+	function establish_snake(){  
+		var map=document.getElementById('map');  
+		var snake=document.createElement('div');  
+		snake.id='snake';  
+		snake.className='list';  
+		snake.style.position='absolute';  															//创建蛇；
+		snake.style.background='red';  
+		snake.style.width=snake_length+'px';  
+		snake.style.height=snake_length+'px';  
+		snake.style.left=round(Math.random()*(map_length-snake_length))+'px';  
+		snake.style.top=round(Math.random()*(map_length-snake_length))+'px';  
+		map.appendChild(snake);  
+	};
+
+
+
+
+
+
+
+	function establish_food(){  
+		var map=document.getElementById('map');  
+		var food=document.createElement('div');  
+		var food_offset_Left=round(Math.random()*(map_length-snake_length));  
+		var food_offset_top=round(Math.random()*(map_length-snake_length)); 
+		var list=getByClass(map, 'list');  															//创建食物；
+		food.id='food';  
+				food.style.position='absolute';  
+				food.style.width=snake_length+'px';  
+				food.style.height=snake_length+'px';  
+				food.style.background='yellow';  
+				for(var i=0; i<list.length; i++)  
+				{  
+					if(food_offset_Left==list[i].offsetLeft||food_offset_top==list[i].offsetTop)  
+					{  
+						food_offset_Left=round(Math.random()*(map_length-snake_length)); 
+						food_offset_top=round(Math.random()*(map_length-snake_length));  
+					};  
+				};  
+				food.style.left=food_offset_Left+'px';  
+				food.style.top=food_offset_top+'px';  
+				map.appendChild(food);  
+			};
+
+		function round(digit)
+		{
+			var arr=digit%10;
+			digit-=arr;
+			return digit;
+		}
+
+
+	function establish_explain(){  
+		var explain=document.createElement('p');  
+		explain.id='explain';  
+		explain.style.position='absolute';  														//游戏说明；
+		explain.style.left='28%';  
+		explain.style.top='5%';  
+		document.body.appendChild(explain); 
+		setInterval(function(){ var list=getByClass(map, 'list');  explain.innerHTML='每当你别吃掉了10个食物，游戏就会加快10mm(毫米),当前的速度是'+time+'mm(毫米),游戏说明：蛇不能回头，不能撞边框，<br/>一但回头和撞边框，网页就会重新加载，你就输了，当前分数是'+(list.length-1)+'分';},10);	  
+	}; 
+
+
+
+
+	function time_(){  
+		var length=11;  
+		clearInterval(timer);  
+		var timer=setInterval(function(){ 
+			var list=getByClass(map, 'list');  
+			if(list.length==length)  
+			{  
+				time=time-10;
+				length=length+10;
+				move();																				//这个是当玩家吃到了十个食物就加快10mm（毫米）；
+				detection();
+				 dining();									
+			}
+			if(list.length==50)
+			{
+				alert('恭喜你赢了，你获得了大吃货的称号！');
+			}
+		},100);
+	}; 
+
+
+
+
+
+	 
+
+
+
+
+
+	function dining(){  
+	var snake=document.getElementById('snake');  
+	var food=document.getElementById('food');  
+	var map=document.getElementById('map');  
+	var snake_left=0;  
+	var snake_top=0;  
+	var food_left=0;  
+	var food_top=0;  
+	var list=null;  
+	function establish_snake_2(){  
+		var snake_2=document.createElement('div');  
+		snake_2.className='list';  
+		snake_2.style.position='absolute';  
+		snake_2.style.background='#666';  
+		snake_2.style.width=snake_length+'px';  
+		snake_2.style.height=snake_length+'px';  
+		map.appendChild(snake_2);  
+	};			  
+	myAddEvent(map, 'mouseover', function(){    
+		clearInterval(timer1);  
+	});
+	myAddEvent(map, 'mouseout', function(){	
+		timer1=setInterval(eat,time-5); 
+	});
+	clearInterval(timer1);  
+
+	timer1=setInterval(eat,time-5);  
+
+		function eat(){  
+
+			var food1=document.getElementById('food')  
+
+			snake_left=parseInt(snake.style.left);  
+
+			snake_top=parseInt(snake.style.top);  
+
+			food_left=parseInt(food1.style.left);  
+			food_top=parseInt(food1.style.top);  
+			list=getByClass(map, 'list');  
+			if(snake_left==food_left&&snake_top==food_top)  
+			{  
+				map.removeChild(food1);  
+				establish_snake_2();  
+				establish_food();		  
+			}  
+			if(list.length>1)  
+			{  
+				for (var i=list.length-1; i>0; i--) {  
+					list[i].style.left=list[i-1].offsetLeft+'px';  
+					list[i].style.top=list[i-1].offsetTop+'px';	  
+				};  
+			}  
+		}  
+	};	
+
+
+
+
+	function myAddEvent(obj, ev, fn)
+	{
+		if(obj.attachEvent)
+		{
+			obj.attachEvent('on'+ev, fn);
+		}
+		else
+		{
+			obj.addEventListener(ev, fn, false);
+		}
+	}
+
+
+
+	document.onkeydown=function 	(ev){  
+		var oEvent=ev||event;  
+		var snake=document.getElementById('snake');  
+		switch(oEvent.keyCode){  
+			case 37:  
+			snake_l=-speed;  
+			snake_t=0;  
+			break;  
+			case 38:  
+			snake_l=0;  
+			snake_t=-speed;  
+			return false;  
+			break;  
+			case 39:  
+			snake_l=speed;  
+			snake_t=0;  
+			break;  
+			case 40:  
+			snake_l=0;  
+			snake_t=speed;  
+			return false;	  
+			break;  
+		}  
+	};   
+
+
+
+	function move(){ 
+		
+		var map=document.getElementById('map');  
+		var snake=document.getElementById('snake');  
+		clearInterval(timer2);
+		timer2=setInterval(move_2,time);  
+		myAddEvent(map, 'mouseover', function(){    
+			clearInterval(timer2);  
+		});
+		myAddEvent(map, 'mouseout', function(){  
+			timer2=setInterval(move_2,time);  
+		}); 
+		
+		function move_2(){ 
+			snake.style.left=snake.offsetLeft+snake_l+'px';  
+			snake.style.top=snake.offsetTop+snake_t+'px';  
+		};  
+	};
+
+
+
+	function getByClass(oParent, sClass){  
+		var aResult=[];  
+		var aEle=oParent.getElementsByTagName('*');  
+		  
+		for(var i=0;i<aEle.length;i++)  
+		{  
+			if(aEle[i].className==sClass)  
+			{  
+				aResult.push(aEle[i]);  
+			}  
+		}  
+		return aResult;  
+	};  
+
+
+	function detection(){ 
+		clearInterval(timer3);  
+	    timer3=setInterval(function(){  
+			var snake=document.getElementById('snake');  
+			var list=getByClass(map, 'list');  
+			if(snake.offsetLeft>(map_length-snake_length)||snake.offsetLeft<0||snake.offsetTop>(map_length-snake_length)||snake.offsetTop<0)  
+			{  
+				window.location.reload();  
+			}  
+			for(var k=list.length-1; k>1; k--)  
+			{  
+				if(list[0].offsetTop==list[k].offsetTop&&list[0].offsetLeft==list[k].offsetLeft)  
+				{  
+					window.location.reload();  
+				}  		
+			}  
+		},time)  
+	};  
+</script> 
+</head>
+<body>
+	
+</body>
+</html>
